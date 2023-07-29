@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Number Guessing Game</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1f1f1f;
+      color: #fff;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      max-width: 400px;
+      background-color: #333;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #444;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .feedback-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .feedback-buttons button {
+      flex: 1;
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .feedback-buttons button:last-child {
+      margin-left: 10px;
+      background-color: #c0392b;
+    }
+
+    .feedback-buttons button:hover {
+      background-color: #45a049;
+      transform: scale(1.05);
+    }
+
+    .feedback-buttons button:last-child:hover {
+      background-color: #a93226;
+    }
+
+    #output {
+      margin-top: 10px;
+      animation: slideIn 1s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #output p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 0;
+      padding: 5px;
+      border-bottom: 1px solid #555;
+    }
+
+    .start-button,
+    .restart-button {
+      width: 100%;
+      background-color: #4285F4;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .start-button:hover,
+    .restart-button:hover {
+      background-color: #3367D6;
+      transform: scale(1.05);
+    }
+
+    .restart-button {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .win-message {
+      display: none;
+      text-align: center;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      color: #4CAF50; /* Green color for the entire winning message */
+      font-weight: bold;
+    }
+
+    .win-message.show {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @media (max-width: 420px) {
+      .container {
+        max-width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Bonjour ! Je suis votre ordinateur et je vais essayer de deviner un nombre entre 1 et 100 auquel vous pensez en moins de 8 essais.</h2>
+    <input type="number" id="secretNumber" placeholder="Veuillez entrer votre nombre secret" />
+    <div class="feedback-buttons">
+      <button onclick="feedback('H')">Trop Haute</button>
+      <button onclick="feedback('B')">Trop Basse</button>
+    </div>
+    <button class="start-button" onclick="startGame()">Commencer le jeu</button>
+    <button class="restart-button" onclick="restartGame()">Recommencer</button>
+    <div id="output"></div>
+    <p class="win-message" id="winMessage">YES ! J'ai deviné votre nombre secret en <span id="attemptsCount"></span> essai<span id="pluralS"></span>.</p>
+  </div>
+
+  <script>
+    let secretNumber;
+    let essais = 0;
+    let min_val = 1;
+    let max_val = 100;
+    let devinette;
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function feedback(reponse) {
+      if (!devinette) return;
+
+      if (reponse === "H") {
+        max_val = devinette - 1;
+      } else if (reponse === "B") {
+        min_val = devinette + 1;
+      }
+      devinette = getRandomInt(min_val, max_val);
+      essais++;
+      makeGuess();
+    }
+
+    function startGame() {
+      secretNumber = parseInt(document.getElementById('secretNumber').value, 10);
+      if (isNaN(secretNumber) || secretNumber < 1 || secretNumber > 100) {
+        alert("Oh! J'ai dit un nombre entre 1 et 100 espèce de pine d'huitre");
+        return;
+      }
+
+      essais = 0;
+      min_val = 1;
+      max_val = 100;
+      devinette = getRandomInt(min_val, max_val);
+      makeGuess();
+      document.querySelector('.feedback-buttons').style.display = 'flex';
+      document.querySelector('.start-button').style.display = 'none';
+      document.querySelector('.restart-button').style.display = 'none';
+      document.getElementById('winMessage').classList.remove('show');
+    }
+
+    function restartGame() {
+      document.getElementById('secretNumber').value = '';
+      document.getElementById('output').innerHTML = '';
+      document.querySelector('.feedback-buttons').style.display = 'flex';
+      document.querySelector('.start-button').style.display = 'block';
+      document.querySelector('.restart-button').style.display = 'none';
+      document.getElementById('winMessage').classList.remove('show');
+      essais = 0;
+      min_val = 1;
+      max_val = 100;
+      devinette = null;
+    }
+
+    function makeGuess() {
+      const outputDiv = document.getElementById('output');
+      outputDiv.innerHTML = '';
+
+      while (devinette !== secretNumber) {
+        outputDiv.innerHTML += "<p>Je devine que votre nombre est " + devinette + "</p>";
+        return;
+      }
+
+      const attemptsText = essais === 1 ? 'essai' : 'essais';
+      document.getElementById('attemptsCount').textContent = essais;
+      document.getElementById('pluralS').textContent = essais === 1 ? '' : 's';
+      document.querySelector('.feedback-buttons').style.display = 'none';
+      document.querySelector('.restart-button').style.display = 'block';
+      document.getElementById('winMessage').classList.add('show');
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
